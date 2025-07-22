@@ -14,4 +14,16 @@ app.use(express.static('public'));
 app.use(cookieParser());
 
 
+
+// Importing routes
+
+import { uploadRouter } from './routes/upload.routes.js';
+
+
+
+// Declare routes
+
+app.use('/api/v1/uploads', uploadRouter);
+
+
 export {app};
