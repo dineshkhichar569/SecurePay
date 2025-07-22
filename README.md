@@ -1,1 +1,1 @@
-# PaySafeSquad
+# SecurePay
