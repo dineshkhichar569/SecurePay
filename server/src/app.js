@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 // Importing routes
 
-import { uploadRouter } from './routes/upload.routes.js';
+import { uploadRouter } from './routes/upload.route.js';
 
 
 

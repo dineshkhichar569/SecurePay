@@ -1,4 +1,4 @@
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utills/cloudinary.js";
 
 const uploadFile = async (req, res)=> {
     try{
