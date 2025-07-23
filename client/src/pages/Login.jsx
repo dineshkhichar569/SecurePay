@@ -33,7 +33,7 @@ export default function Login() {
           transition={{ delay: 0.1 }}
           className="mb-6 text-center text-sm text-cyan-300 tracking-wide"
         >
-          🔒 Secure Login • Zero-Fraud AI Validation
+          🔒 Secure Login • SecurePay AI Validation
         </motion.div>
 
         {/* Title */}

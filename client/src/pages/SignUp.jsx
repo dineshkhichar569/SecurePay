@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -81,7 +81,7 @@ const SignUp = () => {
           className="hidden md:flex flex-col justify-center p-10 bg-white/5 border-r border-white/10"
         >
           <h2 className="text-4xl font-bold text-cyan-400 mb-4">
-            Zero-Fraud Payment
+            SecurePay
           </h2>
           <p className="text-gray-300 text-sm">
             Join the new era of secure, AI-powered student payments. Our fraud-proof system keeps your transactions clean and traceable.
