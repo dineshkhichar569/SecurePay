@@ -3,7 +3,8 @@ import {Router} from 'express';
 import { 
     sendOtp,
     verifyOtp,
-    registerStudent
+    registerStudent,
+    loginStudent
  } from '../controllers/student.controller.js';
 
  import{upload} from "../middleware/multer.middleware.js"
@@ -24,5 +25,8 @@ router
 .route("/verify-otp")
 .post(verifyOtp)
 
+router
+.route("/login")
+.post(loginStudent);
 
 export default router;
