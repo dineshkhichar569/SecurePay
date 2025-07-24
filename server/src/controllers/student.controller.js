@@ -1,15 +1,20 @@
 import {asyncHandler} from "../utills/asyncHandler.js";
 import{ApiError} from "../utills/ApiError.js"
 import { Student } from "../models/student.model.js";
-import{uploadOnCloudinary} from "../utills/cloudinary.js"
 import {ApiResponse} from "../utills/ApiResponse.js"
 import jwt from "jsonwebtoken";
 import sendEmail from "../utills/sendEmail.js";
 import { OTP } from "../models/otp.model.js";
-import cloudinary from "cloudinary";
+import mongoose from "mongoose";
+import Razorpay from "razorpay";
 
-import mongoose from "mongoose"
 
+
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummykey",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "dummysecret",
+});
 
 
 const generateAccessAndRefreshToken = async (studentId) =>{
@@ -29,68 +34,6 @@ const generateAccessAndRefreshToken = async (studentId) =>{
     }
 };
 
-const sendOtp = asyncHandler(async (req, res) => {
-    const {email} = req.body;
-    
-    if(!(email )){
-        throw new ApiError(400, "Email is required");
-    }
-
-    const existingStudent = await Student.findOne({email});
-
-    if(existingStudent){
-        throw new ApiError(400, "Student with this email is already exist");
-    }
-
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    await OTP.deleteMany({email}); 
-    await OTP.create({email, otp});
-
-    const subject = "Verify your email to complete registration - Secure-Pay";
-    const html = `<p>Hello 👋,</p>
-                  <p>Thank you for choosing <strong>Secure-Pay</strong>.</p>
-                  <p>Your One-Time Password (OTP) to complete your sign-up is:</p>
-                  <h2 style="color: #007bff;">${OTP}</h2>
-                  <p>This OTP is valid for <strong>1 minutes</strong>. Please do not share this code with anyone.</p>
-                  <p>If you did not initiate this request, please ignore this email.</p>
-                  <p>Regards,<br> Team SmartCart</p>`;
-
-    await sendEmail(email, subject, html);
-
-    return res
-    .status(200)
-    .json(
-        new ApiResponse(
-            200, 
-            null, 
-            "OTP sent successfully to your email"
-        ));
-
-});
-
-const verifyOtp = asyncHandler(async (req, res) => {
-
-const { email, otp } = req.body;
-  if (!email || !otp) {
-    throw new ApiError(400, "Email and OTP are required");
-  }
-  const existingOtp = await OTP.findOne({ email });
-  if (!existingOtp || existingOtp.otp !== otp) {
-    throw new ApiError(400, "Invalid  OTP");
-  }
-
-  if (existingOtp.expiresAt < Date.now()) {
-    await OTP.deleteOne({ email });
-    throw new ApiError(400, "OTP has expired. Please request a new one.");
-  }
-
-  await OTP.deleteOne({ email });
-
-  return res.status(200).json(
-    new ApiResponse(200, null, "OTP verified successfully")
-  );
-});
 
 const registerStudent = asyncHandler(async (req, res) => {
   const { fullname, email, phone, studentId, password } = req.body;
@@ -173,9 +116,9 @@ return res
 
 });
 
-const logoutUser = asyncHandler(async(req,res) =>{
-    await User.findByIdAndUpdate(
-        req.user._id,
+const logoutStudent = asyncHandler(async(req,res) =>{
+    await Student.findByIdAndUpdate(
+        req.student._id,
         {
             $set: {
                 refreshToken: undefined
@@ -204,22 +147,22 @@ const changeCurrentPassword = asyncHandler(async (req, res)=>{
   if(!(oldPassword && newPassword)){
     throw new ApiError(400, "Old password and new password are required");
   }
-  const user = await User.findById(req.user?._id).select("+password");
+  const student = await Student.findById(req.student?._id).select("+password");
 
-  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  const isPasswordCorrect = await student.isPasswordCorrect(oldPassword);
 
   if(!isPasswordCorrect){
     throw new ApiError(401, "Old password is incorrect");
   }
 
-const isSame = await user.isPasswordCorrect(newPassword);
+const isSame = await student.isPasswordCorrect(newPassword);
   if (isSame) {
     throw new ApiError(400, "Old and new password cannot be the same");
   }
 
-  user.password = newPassword;
+  student.password = newPassword;
 
-  await user.save({validateBeforeSave: false});
+  await student.save({validateBeforeSave: false});
 
   return res 
   .status(200)
@@ -241,10 +184,10 @@ const sendResetOtp = asyncHandler(async (req, res)=>{
         throw new ApiError(400, "Email is required");
     }
 
-    const existingUser = await User.findOne({email});
+    const existingStudent = await Student.findOne({email});
 
-    if(!existingUser){
-        throw new ApiError(400, "User with this email is not exist");
+    if(!existingStudent){
+        throw new ApiError(400, "Student with this email is not exist");
     }
 
 
@@ -252,21 +195,21 @@ const sendResetOtp = asyncHandler(async (req, res)=>{
     await OTP.deleteMany({email}); // Clear any existing OTP for the email
     await OTP.create({email, otp});
 
-    const subject = "OTP for resetting your SmartCart password";
+    const subject = "OTP for resetting your Secure-Pay password";
     const html = `<p>Hello 👋,</p>
 
-<p>We received a request to reset the password for your <strong>SmartCart</strong> account.</p>
+<p>We received a request to reset the password for your <strong>Ssecure-Pay</strong> account.</p>
 
 <p>Your One-Time Password (OTP) for password reset is:</p>
 
 <h2 style="color: #d9534f;">${otp}</h2>
 
-<p>This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone to keep your account secure.</p>
+<p>This OTP is valid for <strong>1 minutes</strong>. Please do not share it with anyone to keep your account secure.</p>
 
 <p>If you did not request a password reset, please contact our support team immediately or ignore this email.</p>
 
 <p>Stay safe,<br>
-Team SmartCart</p>`;
+Team Secure-Pay</p>`;
 
     await sendEmail(email, subject, html);
 
@@ -307,18 +250,18 @@ const resetPassword = asyncHandler(async (req, res)=>{
   if(!(email && newPassword)){
     throw new ApiError(400, "Email and new password are required");
   }
-  const user = await User.findOne({ email }).select("+password");
+  const student = await Student.findOne({ email }).select("+password");
 
-  if(!user){
-    throw new ApiError(404, "User does not exist");
+  if(!student){
+    throw new ApiError(404, "Student does not exist");
   }
 
-  const isSame = await user.isPasswordCorrect(newPassword);
+  const isSame = await student.isPasswordCorrect(newPassword);
   if (isSame) {
     throw new ApiError(400, "New password cannot be the same as the old password");
   }
-  user.password = newPassword;
-  await user.save({validateBeforeSave: false});
+  student.password = newPassword;
+  await student.save({validateBeforeSave: false});
   return res
   .status(200)
   .json(
@@ -343,18 +286,18 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const user = await User.findById(decodedToken?._id);
+    const student = await Student.findById(decodedToken?._id);
 
-    if (!user) {
+    if (!student) {
       throw new ApiError(404, "Invalid refresh token");
     }
 
-    if (!user.refreshToken || user.refreshToken !== incomingRefreshToken.trim()) {
+    if (!student.refreshToken || student.refreshToken !== incomingRefreshToken.trim()) {
       throw new ApiError(401, "Refresh token is expired or invalid");
     }
 
     const { accessToken, refreshToken: newRefreshToken } =
-      await generateAccessAndRefreshToken(user._id);
+      await generateAccessAndRefreshToken(student._id);
 
     const options = {
       httpOnly: true,
@@ -366,7 +309,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .cookie("accessToken", accessToken, options)
       .cookie("refreshToken", newRefreshToken, options)
       .json(
-        new ApiResponse(
+        new ApiRespon+se(
           200,
           { accessToken, refreshToken: newRefreshToken },
           "Access token refreshed successfully"
@@ -377,10 +320,143 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
+const getCurrentStudent = asyncHandler(async (req, res)=> {
+  if (!req.student) {
+    throw new ApiError(401, "Student not authenticated");
+  }
+  return res
+  .status(200)
+  .json(
+    new ApiResponse(
+      200,
+      req.student,
+      "Current student fetched successfully"
+    )
+  )
+});
+
+const updateAccountDetails = asyncHandler(async(req, res)=>{
+  const {fullname, phone,email} = req.body;
+
+  if(!(fullname  || phone || email)){
+    throw new ApiError(400, "At least one field is required to update");
+  }
+  const studentId = req.student?._id;
+  const student = await Student.findById(req.student?._id).select("-password -refreshToken");
+  if (!student) {
+    throw new ApiError(404, "Student not found");
+  }
+  if (email && email !== student.email) {
+    const emailExists = await Student.findOne({ email });
+    if (emailExists && emailExists._id.toString() !== studentId.toString()) {
+      throw new ApiError(400, "Email is already taken");
+    }
+  }
+
+  
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    req.student?._id,
+  {
+    $set:{
+      fullname: fullname || student.fullname,
+      phone: phone || student.phone,
+      email: email || student.email
+    }
+  },
+  {new: true}
+).select("-password -refreshToken");
+
+return res
+  .status(200)
+  .json(
+    new ApiResponse(
+      200,
+      updatedStudent,
+      "Student account details updated successfully"
+    )
+)
+});
+
+const getFeeSummary = asyncHandler(async (req, res)=>{
+  const studentId = req.student._id;
+  const student = await Student.findById(studentId).select("fees")
+
+  if(!student){
+    throw new ApiError(404, "Student not found");
+  }
+  return res
+  .status(200)
+  .json({
+    success:true,
+    data: student.fees
+  })
+})
+
+const updateFeeAfterPayment = asyncHandler(async(req, res)=>{
+  const {category, amount} = req.body;
+  const student = await Student.findById(req.student._id);
+  if(!student){
+    throw new ApiError(404, "Student not found");
+  }
+  if(!student.fees[category]){
+    throw new ApiError(404,"Invalid fee category")
+  }
+  student.fees[category].paid += amount;
+  student.fees[category].due -= amount;
+  await student.save();
+
+  return res 
+  .status(200)
+  .json({
+    success: true,
+    message: `Updated ${category} fee Successfully`,
+    data: student.fees[category]
+  })
+
+})
+
+const createOrder = asyncHandler( async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    if (!amount) {
+      return res.status(400).json({ success: false, message: "Amount is required" });
+    }
+
+    const options = {
+      amount: amount * 100, // convert to paise
+      currency: "INR",
+      receipt: `receipt_order_${Math.floor(Math.random() * 10000)}`
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.status(200).json({
+      success: true,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+    });
+  } catch (error) {
+    console.error("Error creating order:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+});
+
 export{
     generateAccessAndRefreshToken,
-    sendOtp,
-    verifyOtp,
     registerStudent,
-    loginStudent
+    loginStudent,
+    logoutStudent,
+    sendResetOtp,
+    verifyResetOtp,
+    resetPassword,
+    changeCurrentPassword,
+    refreshAccessToken,
+    getCurrentStudent,
+    updateAccountDetails,
+    getFeeSummary,
+    updateFeeAfterPayment,
+    createOrder
 }

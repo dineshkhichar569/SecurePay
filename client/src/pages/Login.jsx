@@ -246,14 +246,9 @@ export default function Login() {
         transition={{ duration: 0.8 }}
         className="z-10 w-full max-w-md px-8 py-10 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-[0_0_30px_rgba(255,255,255,0.1)]"
       >
-        <div className="mb-6 text-center text-sm text-cyan-300 tracking-wide">
-<<<<<<< HEAD
-          🔒 Secure Login • Zero-Fraud AI Validation
-        </div>
-=======
-          🔒 Secure Login • Zero-Fraud AI Validation.
-        </div>
-=======
+        
+
+
         {/* Secure Banner */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -263,8 +258,7 @@ export default function Login() {
         >
           🔒 Secure Login • SecurePay AI Validation
         </motion.div>
-        (Dashboard, Paynow, Transactions, Support Pages Done.)
->>>>>>> f48f04254fd026c0426d6bf1edd88a1c5af48d19
+        
 
         <h2 className="text-center text-3xl font-extrabold text-white tracking-wide mb-6">
           Welcome Back
@@ -359,10 +353,4 @@ export default function Login() {
       </motion.div>
     </div>
   );
-<<<<<<< HEAD
 }
-
-
-=======
-}
->>>>>>> f48f04254fd026c0426d6bf1edd88a1c5af48d19

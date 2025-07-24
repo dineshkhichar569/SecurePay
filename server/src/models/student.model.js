@@ -40,7 +40,79 @@ const studentSchema = new mongoose.Schema({
   refreshToken:{
     type:String,
     select:false
+  },
+  fees: {
+  tuition: {
+    total: { 
+      type: Number, 
+      default: 0 
+    },
+    paid: { 
+      type: Number, 
+      default: 0 
+    },
+    due: { 
+      type: Number, 
+      default: 0 
+    }
+  },
+  hostel: {
+    total: { 
+      type: Number, 
+      default: 0 
+    },
+    paid: { 
+      type: Number, 
+      default: 0 
+    },
+    due: { 
+      type: Number, 
+      default: 0 
+    }
+  },
+  exam: {
+    total: { 
+      type: Number, 
+      default: 0 
+    },
+    paid: { 
+      type: Number, 
+      default: 0 
+    },
+    due: { 
+      type: Number, 
+      default: 0 
+    }
+  },
+  library: {
+    total: { 
+      type: Number, 
+      default: 0 
+    },
+    paid: { 
+      type: Number, 
+      default: 0 
+    },
+    due: { 
+      type: Number, 
+      default: 0 
+    }
+  },
+  event: {
+    total: { 
+      type: Number, 
+      default: 0 
+    },
+    paid: { 
+      type: Number, 
+      default: 0 
+    },
+    due: { 
+      type: Number, 
+      default: 0 
+    }
   }
+}
 }, {
   timestamps: true
 });

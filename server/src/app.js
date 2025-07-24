@@ -20,7 +20,6 @@ app.use(cookieParser());
 import { uploadRouter } from './routes/upload.route.js';
 import studentRouter from './routes/student.route.js'
 
-
 // Declare routes
 
 app.use('/api/v1/uploads', uploadRouter);
