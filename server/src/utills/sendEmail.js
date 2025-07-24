@@ -4,7 +4,7 @@ const sendEmail = async (to, subject, html) => {
     const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || "smtp.gmail.com",
         port: 587,
-        secure: false, // TLS
+        secure: false, 
         auth: {
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS
@@ -12,7 +12,7 @@ const sendEmail = async (to, subject, html) => {
     });
 
     const mailOptions = {
-        from: `"SmartCart" <${process.env.SMTP_USER}>`,
+        from: `"Secure-Pay" <${process.env.SMTP_USER}>`,
         to,
         subject,
         html

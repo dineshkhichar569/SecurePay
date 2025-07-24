@@ -6,15 +6,13 @@ import jwt from "jsonwebtoken";
 import sendEmail from "../utills/sendEmail.js";
 import { OTP } from "../models/otp.model.js";
 import mongoose from "mongoose";
-import Razorpay from "razorpay";
+import PDFDocument from "pdfkit";
+import { Transaction } from "../models/transaction.model.js";
 
 
 
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_dummykey",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "dummysecret",
-});
+
 
 
 const generateAccessAndRefreshToken = async (studentId) =>{
@@ -416,33 +414,65 @@ const updateFeeAfterPayment = asyncHandler(async(req, res)=>{
 
 })
 
-const createOrder = asyncHandler( async (req, res) => {
-  try {
-    const { amount } = req.body;
+const dummyPayment = asyncHandler(async (req, res) => {
+  
+    const {  amount } = req.body;
+    const studentId = req.student._id
+    
+    const isFraud = amount > 50000;
 
-    if (!amount) {
-      return res.status(400).json({ success: false, message: "Amount is required" });
-    }
-
-    const options = {
-      amount: amount * 100, // convert to paise
-      currency: "INR",
-      receipt: `receipt_order_${Math.floor(Math.random() * 10000)}`
-    };
-
-    const order = await razorpay.orders.create(options);
-
-    res.status(200).json({
-      success: true,
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
+    const transaction = await Transaction.create({
+      studentId,
+      amount,
+      status: "success",
+      isFraud,
     });
-  } catch (error) {
-    console.error("Error creating order:", error);
-    res.status(500).json({ success: false, message: "Server Error" });
-  }
+
+    return res.status(200).json({
+      success: true,
+      message: "Dummy payment completed",
+      transactionId: transaction._id,
+      isFraud,
+    });
+   
 });
+
+
+const transactionHistoryController = asyncHandler(async(req, res)=>{
+  const transactions = await Transaction.find({studentId: req.student._id}).sort({createdAt:-1});
+
+  return res
+  .status(200)
+  .json({
+    success:true,
+    transactions
+  })
+})
+
+const generateReceiptController = asyncHandler(async(req, res) =>{
+  const{id} = req.params;
+  const transaction = await Transaction.findById(id).populate(studentId)
+    if(!transaction || transaction.studentId._id.toString() !== req.student._id.toString()){
+      throw new ApiError(404, "Transaction not found")
+    }
+    const doc = new PDFDocument();
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=receipt-${id}.pdf`);
+    doc.fontSize(20).text("SecurePay - Payment Receipt", { align: "center" });
+    doc.moveDown();
+    doc.fontSize(14).text(`Transaction ID: ${transaction._id}`);
+    doc.text(`Student: ${transaction.studentId.name} (${transaction.studentId.email})`);
+    doc.text(`Amount: ₹${transaction.amount}`);
+    doc.text(`Date: ${transaction.createdAt.toLocaleString()}`);
+    doc.text(`Fraud Detected: ${transaction.isFraud ? "Yes" : "No"}`);
+    doc.end();
+})
+
+
+
+
+
+
 
 export{
     generateAccessAndRefreshToken,
@@ -458,5 +488,7 @@ export{
     updateAccountDetails,
     getFeeSummary,
     updateFeeAfterPayment,
-    createOrder
+    dummyPayment,
+    transactionHistoryController,
+    generateReceiptController
 }

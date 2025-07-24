@@ -13,11 +13,15 @@ import {
     refreshAccessToken,
     logoutStudent,
     getCurrentStudent,
-    updateAccountDetails
+    updateAccountDetails,
+    dummyPayment,
+    transactionHistoryController,
+    generateReceiptController
  } from '../controllers/student.controller.js';
 
  
 import { verifyJWT } from "../middleware/auth.middleware.js";
+import { fraudDetector } from '../middleware/fraudDetector.middleware.js';
 
 
 const router = Router();
@@ -96,6 +100,28 @@ router
 .get(
     verifyJWT,
     getCurrentStudent
+)
+
+router
+.route("/dummy-payment")
+.post(
+    verifyJWT,
+    fraudDetector,
+    dummyPayment
+)
+
+router
+.route("/transaction-history")
+.get(
+    verifyJWT,
+    transactionHistoryController
+)
+
+router
+.route("/receipt/:id")
+.get(
+    verifyJWT,
+    generateReceiptController
 )
 
 export default router;
