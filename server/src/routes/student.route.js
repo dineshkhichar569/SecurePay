@@ -5,7 +5,6 @@ import {
     loginStudent,
     getFeeSummary,
     updateFeeAfterPayment,
-    createOrder,
     changeCurrentPassword,
     verifyResetOtp,
     sendResetOtp,
@@ -55,9 +54,7 @@ router
 .route("/send-reset-otp")
 .post(sendResetOtp);
 
-router
-.route("/create-order")
-.post(createOrder);
+
 
 router
 .route("/verify-reset-otp")
