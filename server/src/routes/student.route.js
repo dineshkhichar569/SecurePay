@@ -1,8 +1,6 @@
 import {Router} from 'express';
 
-import { 
-    sendOtp,
-    verifyOtp,
+import {
     registerStudent,
     loginStudent,
     getFeeSummary,
@@ -20,7 +18,7 @@ import {
 
  
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { verify } from 'jsonwebtoken';
+
 
 const router = Router();
 
@@ -29,13 +27,7 @@ router.route("/register").post(
     registerStudent
 )
 
-router
-.route("/send-otp")
-.post(sendOtp);
 
-router
-.route("/verify-otp")
-.post(verifyOtp)
 
 router
 .route("/login")
