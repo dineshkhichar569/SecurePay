@@ -29,7 +29,7 @@ const studentSchema = new mongoose.Schema({
     select: false,
   },
   
-  profilePic: {
+  avatar: {
     type: String,
     
   },

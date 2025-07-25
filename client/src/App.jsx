@@ -1,5 +1,6 @@
 import { Routes, Route} from "react-router-dom";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import './App.css'
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
@@ -14,7 +15,9 @@ function App() {
 
   return (
     <>
+    <ToastContainer position="top-center" autoClose={3000} />
     <Routes>
+      
       <Route path="/" element={<Dashboard />} />
 
       <Route path="/signup" element={<SignUp />} />

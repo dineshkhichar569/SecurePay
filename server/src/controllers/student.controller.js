@@ -7,6 +7,8 @@ import sendEmail from "../utills/sendEmail.js";
 import { OTP } from "../models/otp.model.js";
 import PDFDocument from "pdfkit";
 import { Transaction } from "../models/transaction.model.js";
+import { uploadOnCloudinary } from "../utills/cloudinary.js";
+
 
 
 
@@ -351,16 +353,15 @@ const updateAccountDetails = asyncHandler(async(req, res)=>{
 
   
 
-  const updatedStudent = await Student.findByIdAndUpdate(
-    req.student?._id,
-  {
-    $set:{
-      fullname: fullname || student.fullname,
-      phone: phone || student.phone,
-      email: email || student.email
-    }
-  },
-  {new: true}
+  const updateFields = {};
+if (fullname) updateFields.fullname = fullname;
+if (phone) updateFields.phone = phone;
+if (email) updateFields.email = email;
+
+const updatedStudent = await Student.findByIdAndUpdate(
+  studentId,
+  { $set: updateFields },
+  { new: true }
 ).select("-password -refreshToken");
 
 return res
