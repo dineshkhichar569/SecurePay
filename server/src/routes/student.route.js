@@ -1,4 +1,5 @@
 import {Router} from 'express';
+import { upload } from '../middleware/multer.middleware.js';
 
 import {
     registerStudent,
@@ -15,7 +16,9 @@ import {
     updateAccountDetails,
     dummyPayment,
     transactionHistoryController,
-    generateReceiptController
+    generateReceiptController,
+    getDashBoardData,
+    updateStudentAvatar
  } from '../controllers/student.controller.js';
 
  
@@ -119,6 +122,18 @@ router
 .get(
     verifyJWT,
     generateReceiptController
+)
+
+router
+.route("/dashboard")
+.get(verifyJWT, getDashBoardData)
+
+router
+.route("/update-avatar")
+.patch(
+    verifyJWT,
+    upload.single("avatar"),
+    updateStudentAvatar
 )
 
 export default router;

@@ -33,10 +33,6 @@ const studentSchema = new mongoose.Schema({
     type: String,
     
   },
-  balance: {
-    type: Number,
-    default: 0
-  },
   refreshToken:{
     type:String,
     select:false

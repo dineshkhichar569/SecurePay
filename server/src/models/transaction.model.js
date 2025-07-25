@@ -10,6 +10,9 @@ const transactionSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  description:{
+    type:String
+  },
   status: {
     type: String,
     enum: ["success", "failed", "suspicious"],

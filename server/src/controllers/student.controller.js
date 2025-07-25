@@ -5,7 +5,6 @@ import {ApiResponse} from "../utills/ApiResponse.js"
 import jwt from "jsonwebtoken";
 import sendEmail from "../utills/sendEmail.js";
 import { OTP } from "../models/otp.model.js";
-import mongoose from "mongoose";
 import PDFDocument from "pdfkit";
 import { Transaction } from "../models/transaction.model.js";
 
@@ -31,7 +30,6 @@ const generateAccessAndRefreshToken = async (studentId) =>{
         throw new ApiError(500, "Something went wrong while generate access and refresh token");
     }
 };
-
 
 const registerStudent = asyncHandler(async (req, res) => {
   const { fullname, email, phone, studentId, password } = req.body;
@@ -376,6 +374,43 @@ return res
 )
 });
 
+const updateStudentAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "No avatar uploaded. Nothing was changed"));
+  }
+
+  const student = await Student.findById(req.student?._id);
+
+  if (student?.avatar_public_id) {
+    await cloudinary.v2.uploader.destroy(student.avatar_public_id);
+  }
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar?.url || !avatar?.public_id) {
+    throw new ApiError(400, "Failed to upload new avatar");
+  }
+
+  const updatedStudent = await Student.findByIdAndUpdate(
+    req.student?._id,
+    {
+      $set: {
+        avatar: avatar.url,
+        avatar_public_id: avatar.public_id,
+      },
+    },
+    { new: true }
+  ).select("-password -refreshToken");
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedStudent, "User avatar updated successfully")
+  );
+});
+
 const getFeeSummary = asyncHandler(async (req, res)=>{
   const studentId = req.student._id;
   const student = await Student.findById(studentId).select("fees")
@@ -437,7 +472,6 @@ const dummyPayment = asyncHandler(async (req, res) => {
    
 });
 
-
 const transactionHistoryController = asyncHandler(async(req, res)=>{
   const transactions = await Transaction.find({studentId: req.student._id}).sort({createdAt:-1});
 
@@ -470,20 +504,33 @@ const generateReceiptController = asyncHandler(async(req, res) =>{
 
 const getDashBoardData = asyncHandler(async(req, res) =>{
   const studentId = req.student._id;
-  const student = await Student.findById(studentId).select("walletBalance trustScore");
-  const transactions = await Transaction.find({student:studentId}).sort({createdAt:-1}).limit(5);
-  const lastTxn = transactions[0];
-  const isLastFraud = lastTxn?.isFraud || false;
+  const student = await Student.findById(studentId).select("walletBalance trustScore ");
+  if(!student){
+    throw new ApiError(404, "Student not found")
+  }
+  const transactions = await Transaction.find({student:studentId}).sort({createdAt:-1}).limit(5).select("amouont createdAt isFraud description");
+  const recentTransactions = transactions.map((txn) =>({
+    date: txn.createdAt.toDateString().slice(4,10),
+    desc: txn.description,
+    amount:`${txn.amount.toFixed(2)}`,
+    status: txn.isFraud? "⚠":"✅"
+  }));
+  const lastTransactionFraud = transactions.length>0 && transactions[0].isFraud;
 
   return res 
   .status(200)
-  .json({
-    walletBalance: student.walletBalance,
-    trustScore: student.trustScore||80,
-    recentTransactions: transactions,
-    isLastFraud
-  });
+  .json(
+    new ApiResponse(true, {
+      walletBalance: student.walletBalance || 0,
+      trustScore:student.trustScore|| 82,
+      recentTransactions,
+      isLastTransactionFraud: lastTransactionFraud,
+    })
+  );
 })
+
+
+
 
 
 
@@ -510,5 +557,6 @@ export{
     dummyPayment,
     transactionHistoryController,
     generateReceiptController,
-    getDashBoardData
+    getDashBoardData,
+    updateStudentAvatar
 }
