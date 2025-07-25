@@ -23,7 +23,9 @@ const Navbar = () => {
             className="ml-10 md:ml-0 text-white text-xl md:text-2xl font-bold tracking-wide flex items-center gap-1 hover:scale-105 transition-transform"
           >
             <span className="text-white">Secure</span>
-            <span className="bg-white text-indigo-600 px-2 py-0.5 rounded-md text-sm">Pay</span>
+            <span className="bg-white text-indigo-600 px-2 py-0.5 rounded-md text-sm">
+              Pay
+            </span>
           </Link>
         </motion.div>
 
@@ -57,7 +59,9 @@ const Navbar = () => {
             whileTap={{ scale: 0.95 }}
             className="p-2 rounded-full hover:bg-white/20 transition hover:scale-110"
           >
-            <User className="w-5 h-5" />
+            <Link to="/setting">
+              <User className="w-5 h-5" />
+            </Link>
           </motion.button>
         </motion.div>
       </div>

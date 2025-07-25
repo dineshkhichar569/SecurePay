@@ -1,0 +1,18 @@
+{
+    "sourceFile": "client/src/App.jsx",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753419105111,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753419105111,
+            "name": "Commit-0",
+            "content": "import { Routes, Route} from \"react-router-dom\";\r\n\r\nimport './App.css'\r\nimport SignUp from \"./pages/SignUp\";\r\nimport Login from \"./pages/Login\";\r\nimport Dashboard from \"./pages/Dashboard\";\r\nimport MakePayment from \"./pages/MakePayment\";\r\nimport PayNow from \"./pages/PayNow\";\r\nimport Transaction from \"./pages/Transactions\";\r\nimport Support from \"./pages/Support\";\r\nimport Settings from \"./pages/Settings\";\r\n\r\nfunction App() {\r\n\r\n  return (\r\n    <>\r\n    <Routes>\r\n      <Route path=\"/\" element={<Dashboard />} />\r\n\r\n      <Route path=\"/signup\" element={<SignUp />} />\r\n      <Route path=\"/login\" element={<Login />} />\r\n\r\n\r\n\r\n      <Route path=\"/makepayment\" element={<MakePayment />} />\r\n\r\n      \r\n\r\n      <Route path=\"/dashboard\" element={<Dashboard />} />\r\n      <Route path=\"/paynow\" element={<PayNow />} />\r\n      <Route path=\"/transactions\" element={<Transaction />} />\r\n      <Route path=\"/support\" element={<Support />} />\r\n      <Route path=\"/setting\" element={<Settings />} />\r\n    </Routes>\r\n    </>\r\n  )\r\n}\r\n\r\nexport default App\r\n"
+        }
+    ]
+}
