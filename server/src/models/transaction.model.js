@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema({
-  studentId: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Student",
     required: true,
@@ -9,6 +9,10 @@ const transactionSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
+  },
+  type:{
+    type:String,
+    required:true,
   },
   description:{
     type:String

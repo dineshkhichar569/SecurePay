@@ -474,8 +474,11 @@ const dummyPayment = asyncHandler(async (req, res) => {
 });
 
 const transactionHistoryController = asyncHandler(async(req, res)=>{
-  const transactions = await Transaction.find({studentId: req.student._id}).sort({createdAt:-1});
+  console.log("Student in request: ", req.student);
+console.log("Transaction history route hit");
 
+  const transactions = await Transaction.find({user: req.student._id}).sort({createdAt:-1});
+console.log("Transactions found: ", transactions);
   return res
   .status(200)
   .json({
