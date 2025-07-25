@@ -466,6 +466,23 @@ const generateReceiptController = asyncHandler(async(req, res) =>{
     doc.text(`Date: ${transaction.createdAt.toLocaleString()}`);
     doc.text(`Fraud Detected: ${transaction.isFraud ? "Yes" : "No"}`);
     doc.end();
+});
+
+const getDashBoardData = asyncHandler(async(req, res) =>{
+  const studentId = req.student._id;
+  const student = await Student.findById(studentId).select("walletBalance trustScore");
+  const transactions = await Transaction.find({student:studentId}).sort({createdAt:-1}).limit(5);
+  const lastTxn = transactions[0];
+  const isLastFraud = lastTxn?.isFraud || false;
+
+  return res 
+  .status(200)
+  .json({
+    walletBalance: student.walletBalance,
+    trustScore: student.trustScore||80,
+    recentTransactions: transactions,
+    isLastFraud
+  });
 })
 
 
@@ -490,5 +507,6 @@ export{
     updateFeeAfterPayment,
     dummyPayment,
     transactionHistoryController,
-    generateReceiptController
+    generateReceiptController,
+    getDashBoardData
 }

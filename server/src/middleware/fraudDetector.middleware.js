@@ -2,6 +2,7 @@ import { ApiError } from "../utills/ApiError.js";
 import { ApiResponse } from "../utills/ApiResponse.js";
 import geoip from "geoip-lite"; // for IP-based location
 import useragent from "useragent"; // for device info
+import { Transaction } from "../models/transaction.model.js";
 
 export const fraudDetector = (req, res, next) => {
   const { amount } = req.body;
@@ -27,6 +28,7 @@ export const fraudDetector = (req, res, next) => {
   if (student?.failedAttempts > 3) fraudScore += 0.1;
 
   if (fraudScore >= 0.7) {
+    Transaction.isFraud = true;
     return next(
       new ApiError(
         403,

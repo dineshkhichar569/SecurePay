@@ -112,6 +112,14 @@ const studentSchema = new mongoose.Schema({
       default: 0 
     }
   }
+},
+walletBalance:{
+  type:Number,
+  default:0,
+},
+trustScore:{
+  type:Number,
+  default:80,
 }
 }, {
   timestamps: true
